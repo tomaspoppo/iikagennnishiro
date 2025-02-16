@@ -6,7 +6,10 @@
 
     <!-- スプラッシュ画面のテーマ -->
     <style name="Theme.SplashScreen" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <!-- ここから削除 -->
+        <!-- <item name="android:windowBackground">@drawable/splash_screen</item> -->
+        <!-- ここまで削除 -->
+        <item name="android:windowBackground">@color/black</item> <!-- 背景色を黒に変更 -->
     </style>
 
 </resources>

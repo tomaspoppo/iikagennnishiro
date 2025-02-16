@@ -16,7 +16,7 @@
         <!-- スプラッシュ画面を最初に起動 -->
         <activity
             android:name=".ui.splash.SplashActivity"
-            android:theme="@style/Theme.SplashScreen"
+            android:theme="@style/Theme.Iikagennnishiro"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
