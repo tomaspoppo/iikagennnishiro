@@ -16,6 +16,6 @@ class SplashActivity : Activity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish() // スプラッシュ画面を閉じる
-        }, 2000) // 2000ミリ秒 (2秒)
+        }, 3300) // 3300ミリ秒 (2秒)
     }
 }
