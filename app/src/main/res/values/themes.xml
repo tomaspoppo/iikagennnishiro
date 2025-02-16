@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- メインテーマ（既存のまま） -->
     <style name="Theme.Iikagennnishiro" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- スプラッシュ画面のテーマ -->
+    <style name="Theme.SplashScreen" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
 </resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 背景色（ブラック） -->
+    <item android:drawable="@color/black" />
+
+    <!-- ロゴ画像を中央に配置 -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/taxi_phoenix_logo" />
+    </item>
+
+</layer-list>
