@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 背景を黒に設定 -->
+    <item android:drawable="@color/black" />
+    <!-- ロゴを中央に配置 -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_screen_logo" />
+    </item>
+</layer-list>

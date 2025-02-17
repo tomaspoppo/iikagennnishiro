@@ -1,23 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Iikagennnishiro"
+        android:theme="@style/Theme.iikagennnishiro"
         tools:targetApi="31">
 
-        <!-- ✅ アプリの最初の画面 -->
+        <!-- ✅ スプラッシュ画面 -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.SplashActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Iikagennnishiro">
+            android:theme="@style/Theme.SplashScreen"> <!-- 🔄 修正 -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ✅ メイン画面 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.iikagennnishiro"/>
 
     </application>
 
