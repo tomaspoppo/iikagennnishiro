@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- メインテーマ（既存のまま） -->
-    <style name="Theme.Iikagennnishiro" parent="android:Theme.Material.Light.NoActionBar" />
-
-    <!-- スプラッシュ画面のテーマ -->
-    <style name="Theme.SplashScreen" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- ここから削除 -->
-        <!-- <item name="android:windowBackground">@drawable/splash_screen</item> -->
-        <!-- ここまで削除 -->
-        <item name="android:windowBackground">@color/black</item> <!-- 背景色を黒に変更 -->
+    <style name="Theme.Iikagennnishiro" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/black</item>  <!-- ✅ 背景を黒にする -->
+        <item name="android:windowDisablePreview">true</item>  <!-- ✅ プレビューを完全無効化 -->
+        <item name="android:windowIsTranslucent">false</item>  <!-- ✅ 透明画面を防ぐ -->
     </style>
 
 </resources>
