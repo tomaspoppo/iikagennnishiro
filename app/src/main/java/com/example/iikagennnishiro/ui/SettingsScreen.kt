@@ -27,6 +27,7 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
     val sharedPreferences = context.getSharedPreferences("SalesData", Context.MODE_PRIVATE)
 
     var defaultStartDate by remember { mutableStateOf("") }
+    var defaultEndDate by remember { mutableStateOf("") }
     var customStartDate by remember { mutableStateOf("") }
     var customEndDate by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -36,6 +37,7 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
     LaunchedEffect(Unit) {
         val today = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN).format(Date())
         defaultStartDate = sharedPreferences.getString("DefaultStartDate", "未設定") ?: "未設定"
+        defaultEndDate = sharedPreferences.getString("DefaultEndDate", "未設定") ?: "未設定"
         customStartDate = sharedPreferences.getString("CustomStartDate", today) ?: "未設定"
         customEndDate = sharedPreferences.getString("CustomEndDate", today) ?: "未設定"
         isCustomEnabled = sharedPreferences.getBoolean("CustomEnabled", false)
@@ -79,19 +81,38 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 🔹 デフォルト売上開始日設定
+                // 🔹 基本売上開始日設定
                 Button(
                     onClick = {
-                        datePickerMode = "default"
+                        datePickerMode = "defaultStart"
                         showDatePicker = true
                     },
                     enabled = !isCustomEnabled
                 ) {
-                    Text("デフォルト売上開始日設定", fontSize = 15.sp)
+                    Text("基本売上開始日設定", fontSize = 15.sp)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "デフォルト売上開始日: ${if (defaultStartDate.isNotEmpty()) defaultStartDate else "未設定"}",
+                    "基本売上開始日: ${if (defaultStartDate.isNotEmpty()) defaultStartDate else "未設定"}",
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 🔹 基本売上締め日設定（追加）
+                Button(
+                    onClick = {
+                        datePickerMode = "defaultEnd"
+                        showDatePicker = true
+                    },
+                    enabled = !isCustomEnabled
+                ) {
+                    Text("基本売上締め日設定", fontSize = 15.sp)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "基本売上締め日: ${if (defaultEndDate.isNotEmpty()) defaultEndDate else "未設定"}",
                     fontSize = 16.sp,
                     color = Color.Black
                 )
@@ -148,9 +169,13 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
             { _, year, month, dayOfMonth ->
                 val date = "${year}年${month + 1}月${dayOfMonth}日"
                 when (datePickerMode) {
-                    "default" -> {
+                    "defaultStart" -> {
                         defaultStartDate = date
                         sharedPreferences.edit().putString("DefaultStartDate", date).apply()
+                    }
+                    "defaultEnd" -> {
+                        defaultEndDate = date
+                        sharedPreferences.edit().putString("DefaultEndDate", date).apply()
                     }
                     "customStart" -> {
                         customStartDate = date

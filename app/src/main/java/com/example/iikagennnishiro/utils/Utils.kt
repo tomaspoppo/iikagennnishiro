@@ -46,9 +46,9 @@ fun loadCustomDateRange(sharedPreferences: SharedPreferences): Pair<String, Stri
 fun getFilteredSalesData(
     sharedPreferences: SharedPreferences,
     customRange: Pair<String, String>?
-): Map<String, String> {
+): Map<String, Pair<String, String>> {
     val allData = sharedPreferences.all.mapValues { it.value.toString() }
-    val filteredData = mutableMapOf<String, String>()
+    val filteredData = mutableMapOf<String, Pair<String, String>>()
     val dateFormat = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN)
 
     val (startDateStr, endDateStr) = customRange
@@ -59,21 +59,16 @@ fun getFilteredSalesData(
             Pair(start, end)
         }
 
-    // 🔹 "未設定" の場合は今日の日付を使う
     val startDate = try {
-        if (startDateStr == "未設定") throw IllegalArgumentException("売上開始日が未設定")
-        dateFormat.parse(startDateStr)
+        dateFormat.parse(startDateStr) ?: Date()
     } catch (e: Exception) {
-        println("エラー: ${e.message}, startDateを今日の日付に変更")
-        Date() // 今日の日付を使う
+        Date()
     }
 
     val endDate = try {
-        if (endDateStr == "未設定") throw IllegalArgumentException("売上終了日が未設定")
-        dateFormat.parse(endDateStr)
+        dateFormat.parse(endDateStr) ?: Date()
     } catch (e: Exception) {
-        println("エラー: ${e.message}, endDateを今日の日付に変更")
-        Date() // 今日の日付を使う
+        Date()
     }
 
     val calendar = Calendar.getInstance()
@@ -81,8 +76,13 @@ fun getFilteredSalesData(
 
     while (!calendar.time.after(endDate)) {
         val date = dateFormat.format(calendar.time)
-        allData[date]?.let {
-            filteredData[date] = it
+        allData[date]?.let { value ->
+            val splitValues = value.split(",")
+            if (splitValues.size == 2) {
+                filteredData[date] = Pair(splitValues[0], splitValues[1]) // 売上金額, 労働時間
+            } else {
+                filteredData[date] = Pair(value, "0時間0分") // 労働時間がない場合デフォルトを設定
+            }
         }
         calendar.add(Calendar.DAY_OF_MONTH, 1)
     }

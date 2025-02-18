@@ -1,7 +1,6 @@
 package com.example.iikagennnishiro.ui
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,19 +28,24 @@ fun SalesHistoryScreen(navController: NavController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("SalesData", Context.MODE_PRIVATE)
 
-    var salesData by remember { mutableStateOf(emptyMap<String, String>()) }
+    var salesData by remember { mutableStateOf(emptyMap<String, Pair<String, String>>()) }
     var salesStartDate by remember { mutableStateOf("") }
+    var salesEndDate by remember { mutableStateOf("") }
     var customDateRange by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var isCustomEnabled by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
+    // 🔹 データ取得関数
+    fun fetchSalesData() {
         val today = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN).format(Date())
-        salesStartDate = getCurrentSalesStartDate(sharedPreferences, today)
+        salesStartDate = sharedPreferences.getString("DefaultStartDate", today) ?: today
+        salesEndDate = sharedPreferences.getString("DefaultEndDate", getNextClosingDate(salesStartDate)) ?: getNextClosingDate(salesStartDate)
         customDateRange = getCustomDateRange(sharedPreferences)
+        isCustomEnabled = sharedPreferences.getBoolean("CustomEnabled", false)
 
-        salesData = if (customDateRange != null) {
+        salesData = if (isCustomEnabled && customDateRange != null) {
             getFilteredSalesData(sharedPreferences, customDateRange!!)
         } else {
-            getFilteredSalesData(sharedPreferences, Pair(salesStartDate, ""))
+            getFilteredSalesData(sharedPreferences, Pair(salesStartDate, salesEndDate))
         }
     }
 
@@ -66,16 +70,18 @@ fun SalesHistoryScreen(navController: NavController) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("売上履歴", fontSize = 18.sp, color = Color.Black)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("現在の売上開始日: $salesStartDate", fontSize = 16.sp, color = Color.Black)
-                if (customDateRange != null) {
-                    Text("カスタム期間: ${customDateRange!!.first} 〜 ${customDateRange!!.second}", fontSize = 16.sp, color = Color.Red)
-                }
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // 🔹 データ抽出ボタン
+                Button(onClick = { fetchSalesData() }) {
+                    Text("データ抽出", fontSize = 16.sp)
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 🔹 売上データの表示（LazyColumn）
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(salesData.toList()) { (date, amount) ->
+                    items(salesData.toList()) { (date, data) ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -84,7 +90,8 @@ fun SalesHistoryScreen(navController: NavController) {
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(text = date, fontSize = 18.sp, color = Color.Black)
-                                Text(text = "売上: ¥$amount", fontSize = 16.sp, color = Color.Black)
+                                Text(text = "売上: ¥${data.first}", fontSize = 16.sp, color = Color.Black)
+                                Text(text = "労働時間: ${data.second}", fontSize = 16.sp, color = Color.Black)
                             }
                         }
                     }
@@ -92,4 +99,19 @@ fun SalesHistoryScreen(navController: NavController) {
             }
         }
     )
+}
+
+// 🔹 次の売上締め日を取得（開始日の前日）
+fun getNextClosingDate(startDate: String): String {
+    if (startDate.isEmpty()) return "不明"
+    val sdf = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN)
+    return try {
+        val calendar = Calendar.getInstance()
+        calendar.time = sdf.parse(startDate)!!
+        calendar.add(Calendar.MONTH, 1)
+        calendar.add(Calendar.DAY_OF_MONTH, -1)
+        sdf.format(calendar.time)
+    } catch (e: Exception) {
+        "不明"
+    }
 }
