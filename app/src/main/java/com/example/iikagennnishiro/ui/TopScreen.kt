@@ -98,7 +98,7 @@ fun TopScreen(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.taxi_logo),
+                    painter = painterResource(id = R.drawable.splash_screen_logo),
                     contentDescription = "TOP画面ロゴ",
                     modifier = Modifier.size(200.dp),
                     contentScale = ContentScale.Fit
