@@ -27,14 +27,17 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
     val sharedPreferences = context.getSharedPreferences("SalesData", Context.MODE_PRIVATE)
 
     var customStartDate by remember { mutableStateOf("") }
+    var customEndDate by remember { mutableStateOf("") }
     var showCustomDateDialog by remember { mutableStateOf(false) }
     var showFirstDialog by remember { mutableStateOf(false) }
+    var showEndDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         println("⚙ 設定画面が開いた") // デバッグログ
         try {
             val today = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN).format(Date())
             customStartDate = sharedPreferences.getString("CustomStartDate", today) ?: "未設定"
+            customEndDate = sharedPreferences.getString("CustomEndDate", today) ?: "未設定"
         } catch (e: Exception) {
             println("エラー: ${e.localizedMessage}")
         }
@@ -61,26 +64,30 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("カスタム期間設定", fontSize = 18.sp, color = Color.Black)
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Button(onClick = { showFirstDialog = true }) {
-                    Text("カスタム期間を設定", fontSize = 16.sp)
+                    Text("ｶｽﾀﾑ売上開始日設定", fontSize = 15.sp)
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    "現在のカスタム開始日: ${if (customStartDate.isNotEmpty()) customStartDate else "未設定"}",
+                    "ｶｽﾀﾑ売上開始日: ${if (customStartDate.isNotEmpty()) customStartDate else "未設定"}",
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { showEndDialog = true }) {
+                    Text("ｶｽﾀﾑ売上締め日設定", fontSize = 15.sp)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "ｶｽﾀﾑ売上締め日: ${if (customEndDate.isNotEmpty()) customEndDate else "未設定"}",
                     fontSize = 16.sp,
                     color = Color.Black
                 )
 
-                // 🔹 最初のダイアログ
                 if (showFirstDialog) {
                     AlertDialog(
                         onDismissRequest = { showFirstDialog = false },
-                        title = { Text("カレンダー表示") },
-                        text = { Text("今からカレンダーが表示されます。売上開始日をタップしてください。") },
+                        text = { Text("売上開始日を決めて下さい") },
                         confirmButton = {
                             Button(
                                 onClick = {
@@ -100,16 +107,38 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                     )
                 }
 
-                // 🔹 カレンダー表示
+                if (showEndDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showEndDialog = false },
+                        text = { Text("売上締め日を決めて下さい") },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    showEndDialog = false
+                                    showCustomDateDialog = true
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC0CB))
+                            ) {
+                                Text("はい")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { showEndDialog = false }) {
+                                Text("いいえ")
+                            }
+                        }
+                    )
+                }
+
                 if (showCustomDateDialog) {
                     val calendar = Calendar.getInstance()
 
                     DatePickerDialog(
                         context,
-                        { _, startYear, startMonth, startDayOfMonth ->
-                            val startDate = "${startYear}年${startMonth + 1}月${startDayOfMonth}日"
-                            customStartDate = startDate
-                            saveCustomDateRange(context, startDate, startDate)
+                        { _, year, month, dayOfMonth ->
+                            val date = "${year}年${month + 1}月${dayOfMonth}日"
+                            if (showFirstDialog) customStartDate = date else customEndDate = date
+                            saveCustomDateRange(context, customStartDate, customEndDate)
                             showCustomDateDialog = false
                         },
                         calendar.get(Calendar.YEAR),
