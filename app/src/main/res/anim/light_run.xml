@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:interpolator="@android:anim/accelerate_decelerate_interpolator">
+    android:interpolator="@android:anim/linear_interpolator">
 
-    <!-- 横方向に移動 -->
+    <!-- 🔥 速く、シャープに動く光エフェクト -->
     <translate
-        android:fromXDelta="-100%"
-        android:toXDelta="100%"
-        android:duration="2000"
+        android:fromXDelta="-120%"
+        android:toXDelta="120%"
+        android:duration="700"
         android:repeatCount="infinite"
-        android:repeatMode="restart"/>
+        android:repeatMode="restart" />
 </set>

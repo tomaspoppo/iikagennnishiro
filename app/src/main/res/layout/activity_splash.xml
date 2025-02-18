@@ -1,23 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- 🔥 ロゴ -->
+    <!-- 🔥 ロゴ（最前面に配置！） -->
     <ImageView
-        android:id="@+id/splash_logo"
+        android:id="@+id/splash_screen_logo"
         android:layout_width="324dp"
         android:layout_height="324dp"
         android:layout_gravity="center"
         android:src="@drawable/splash_screen_logo"
         android:scaleType="fitCenter"/>
 
-    <!-- 🔥 画面全体に光を走らせるView -->
-    <View
-        android:id="@+id/light_effect"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/light_effect_gradient"
-        android:visibility="gone"/>
 </FrameLayout>
+
