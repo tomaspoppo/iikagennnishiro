@@ -11,4 +11,14 @@
         android:layout_height="324dp"
         android:src="@drawable/splash_screen_logo"
         android:scaleType="fitCenter"/>
+
+    <!-- ✅ 光のエフェクト -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/light_effect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@raw/splash_light_effect"
+        android:repeatCount="infinite"
+        android:scaleType="fitCenter"/>
 </LinearLayout>
