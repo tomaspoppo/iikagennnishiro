@@ -26,21 +26,19 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("SalesData", Context.MODE_PRIVATE)
 
+    var defaultStartDate by remember { mutableStateOf("") }
     var customStartDate by remember { mutableStateOf("") }
     var customEndDate by remember { mutableStateOf("") }
-    var showCustomDateDialog by remember { mutableStateOf(false) }
-    var showFirstDialog by remember { mutableStateOf(false) }
-    var showEndDialog by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var datePickerMode by remember { mutableStateOf("") }
+    var isCustomEnabled by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        println("⚙ 設定画面が開いた") // デバッグログ
-        try {
-            val today = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN).format(Date())
-            customStartDate = sharedPreferences.getString("CustomStartDate", today) ?: "未設定"
-            customEndDate = sharedPreferences.getString("CustomEndDate", today) ?: "未設定"
-        } catch (e: Exception) {
-            println("エラー: ${e.localizedMessage}")
-        }
+        val today = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN).format(Date())
+        defaultStartDate = sharedPreferences.getString("DefaultStartDate", "未設定") ?: "未設定"
+        customStartDate = sharedPreferences.getString("CustomStartDate", today) ?: "未設定"
+        customEndDate = sharedPreferences.getString("CustomEndDate", today) ?: "未設定"
+        isCustomEnabled = sharedPreferences.getBoolean("CustomEnabled", false)
     }
 
     Scaffold(
@@ -64,7 +62,50 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(onClick = { showFirstDialog = true }) {
+                // 🔹 スライドスイッチ
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("カスタム集計を有効にする", fontSize = 16.sp, color = Color.Black)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Switch(
+                        checked = isCustomEnabled,
+                        onCheckedChange = {
+                            isCustomEnabled = it
+                            sharedPreferences.edit().putBoolean("CustomEnabled", it).apply()
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 🔹 デフォルト売上開始日設定
+                Button(
+                    onClick = {
+                        datePickerMode = "default"
+                        showDatePicker = true
+                    },
+                    enabled = !isCustomEnabled
+                ) {
+                    Text("デフォルト売上開始日設定", fontSize = 15.sp)
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "デフォルト売上開始日: ${if (defaultStartDate.isNotEmpty()) defaultStartDate else "未設定"}",
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 🔹 カスタム売上開始日設定
+                Button(
+                    onClick = {
+                        datePickerMode = "customStart"
+                        showDatePicker = true
+                    },
+                    enabled = isCustomEnabled
+                ) {
                     Text("ｶｽﾀﾑ売上開始日設定", fontSize = 15.sp)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -73,8 +114,17 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                     fontSize = 16.sp,
                     color = Color.Black
                 )
+
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { showEndDialog = true }) {
+
+                // 🔹 カスタム売上締め日設定
+                Button(
+                    onClick = {
+                        datePickerMode = "customEnd"
+                        showDatePicker = true
+                    },
+                    enabled = isCustomEnabled
+                ) {
                     Text("ｶｽﾀﾑ売上締め日設定", fontSize = 15.sp)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -84,69 +134,38 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                     color = Color.Black
                 )
 
-                if (showFirstDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showFirstDialog = false },
-                        text = { Text("売上開始日を決めて下さい") },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showFirstDialog = false
-                                    showCustomDateDialog = true
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC0CB))
-                            ) {
-                                Text("はい")
-                            }
-                        },
-                        dismissButton = {
-                            Button(onClick = { showFirstDialog = false }) {
-                                Text("いいえ")
-                            }
-                        }
-                    )
-                }
-
-                if (showEndDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showEndDialog = false },
-                        text = { Text("売上締め日を決めて下さい") },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showEndDialog = false
-                                    showCustomDateDialog = true
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC0CB))
-                            ) {
-                                Text("はい")
-                            }
-                        },
-                        dismissButton = {
-                            Button(onClick = { showEndDialog = false }) {
-                                Text("いいえ")
-                            }
-                        }
-                    )
-                }
-
-                if (showCustomDateDialog) {
-                    val calendar = Calendar.getInstance()
-
-                    DatePickerDialog(
-                        context,
-                        { _, year, month, dayOfMonth ->
-                            val date = "${year}年${month + 1}月${dayOfMonth}日"
-                            if (showFirstDialog) customStartDate = date else customEndDate = date
-                            saveCustomDateRange(context, customStartDate, customEndDate)
-                            showCustomDateDialog = false
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
-                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     )
+
+    // 🔹 カレンダーダイアログ（共通）
+    if (showDatePicker) {
+        val calendar = Calendar.getInstance()
+
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val date = "${year}年${month + 1}月${dayOfMonth}日"
+                when (datePickerMode) {
+                    "default" -> {
+                        defaultStartDate = date
+                        sharedPreferences.edit().putString("DefaultStartDate", date).apply()
+                    }
+                    "customStart" -> {
+                        customStartDate = date
+                        sharedPreferences.edit().putString("CustomStartDate", date).apply()
+                    }
+                    "customEnd" -> {
+                        customEndDate = date
+                        sharedPreferences.edit().putString("CustomEndDate", date).apply()
+                    }
+                }
+                showDatePicker = false
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
 }
