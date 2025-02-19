@@ -27,17 +27,18 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
     val sharedPreferences = context.getSharedPreferences("SalesData", Context.MODE_PRIVATE)
 
     var defaultStartDate by remember { mutableStateOf("") }
-    var defaultEndDate by remember { mutableStateOf("") }
+    var defaultEndDate by remember { mutableStateOf("") } // 🔹 基本売上締め日を追加
     var customStartDate by remember { mutableStateOf("") }
     var customEndDate by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
     var datePickerMode by remember { mutableStateOf("") }
     var isCustomEnabled by remember { mutableStateOf(false) }
 
+    // 🔹 初期化処理
     LaunchedEffect(Unit) {
         val today = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN).format(Date())
         defaultStartDate = sharedPreferences.getString("DefaultStartDate", "未設定") ?: "未設定"
-        defaultEndDate = sharedPreferences.getString("DefaultEndDate", "未設定") ?: "未設定"
+        defaultEndDate = sharedPreferences.getString("DefaultEndDate", "未設定") ?: "未設定" // 🔹 追加
         customStartDate = sharedPreferences.getString("CustomStartDate", today) ?: "未設定"
         customEndDate = sharedPreferences.getString("CustomEndDate", today) ?: "未設定"
         isCustomEnabled = sharedPreferences.getBoolean("CustomEnabled", false)
@@ -48,7 +49,11 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
             TopAppBar(
                 title = { Text("設定", fontSize = 20.sp, color = Color.Black) },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = {
+                        showDatePicker = false // 🔹 ナビゲーション時にカレンダーをリセット
+                        datePickerMode = ""
+                        onBackClick()
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る", tint = Color.Black)
                     }
                 },
@@ -64,10 +69,8 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 🔹 スライドスイッチ
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                // 🔹 スライドスイッチ（カスタム集計）
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("カスタム集計を有効にする", fontSize = 16.sp, color = Color.Black)
                     Spacer(modifier = Modifier.width(8.dp))
                     Switch(
@@ -173,7 +176,7 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                         defaultStartDate = date
                         sharedPreferences.edit().putString("DefaultStartDate", date).apply()
                     }
-                    "defaultEnd" -> {
+                    "defaultEnd" -> { // 🔹 追加（基本売上締め日）
                         defaultEndDate = date
                         sharedPreferences.edit().putString("DefaultEndDate", date).apply()
                     }
@@ -187,10 +190,16 @@ fun SettingsScreen(navController: NavController, onBackClick: () -> Unit) {
                     }
                 }
                 showDatePicker = false
+                datePickerMode = ""
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        ).apply {
+            setOnCancelListener {
+                showDatePicker = false
+                datePickerMode = ""
+            }
+        }.show()
     }
 }
