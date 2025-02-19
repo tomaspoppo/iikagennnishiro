@@ -33,20 +33,34 @@ fun SalesHistoryScreen(navController: NavController) {
     var salesEndDate by remember { mutableStateOf("") }
     var customDateRange by remember { mutableStateOf<Pair<String, String>?>(null) }
     var isCustomEnabled by remember { mutableStateOf(false) }
+    var currentPeriod by remember { mutableStateOf("売上期間: 未設定") } // 🔹 現在の売上期間を表示する変数
 
-    // 🔹 データ取得関数
+    // 🔹 売上データを取得する関数（画面起動時＆ボタン押下時に使用）
     fun fetchSalesData() {
         val today = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN).format(Date())
-        salesStartDate = sharedPreferences.getString("DefaultStartDate", today) ?: today
-        salesEndDate = sharedPreferences.getString("DefaultEndDate", getNextClosingDate(salesStartDate)) ?: getNextClosingDate(salesStartDate)
+        salesStartDate = getCurrentSalesStartDate(sharedPreferences, today)
+        salesEndDate = sharedPreferences.getString("DefaultEndDate", "未設定") ?: "未設定"
         customDateRange = getCustomDateRange(sharedPreferences)
         isCustomEnabled = sharedPreferences.getBoolean("CustomEnabled", false)
 
+        // 🔹 売上期間を UI に即時反映
+        currentPeriod = if (isCustomEnabled && customDateRange != null) {
+            "売上期間: ${customDateRange!!.first} ～ ${customDateRange!!.second}"
+        } else {
+            "売上期間: $salesStartDate ～ $salesEndDate"
+        }
+
+        // 🔹 売上データを取得
         salesData = if (isCustomEnabled && customDateRange != null) {
             getFilteredSalesData(sharedPreferences, customDateRange!!)
         } else {
             getFilteredSalesData(sharedPreferences, Pair(salesStartDate, salesEndDate))
         }
+    }
+
+    // 🔹 画面が開いたときに売上期間を表示＆データ取得
+    LaunchedEffect(Unit) {
+        fetchSalesData()
     }
 
     Scaffold(
@@ -72,7 +86,16 @@ fun SalesHistoryScreen(navController: NavController) {
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // 🔹 データ抽出ボタン
+                // 🔹 現在の売上期間を表示（データ抽出ボタンの上）
+                Text(
+                    text = currentPeriod,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // 🔹 データ抽出ボタン（手動更新用）
                 Button(onClick = { fetchSalesData() }) {
                     Text("データ抽出", fontSize = 16.sp)
                 }
@@ -99,19 +122,4 @@ fun SalesHistoryScreen(navController: NavController) {
             }
         }
     )
-}
-
-// 🔹 次の売上締め日を取得（開始日の前日）
-fun getNextClosingDate(startDate: String): String {
-    if (startDate.isEmpty()) return "不明"
-    val sdf = SimpleDateFormat("yyyy年MM月dd日", Locale.JAPAN)
-    return try {
-        val calendar = Calendar.getInstance()
-        calendar.time = sdf.parse(startDate)!!
-        calendar.add(Calendar.MONTH, 1)
-        calendar.add(Calendar.DAY_OF_MONTH, -1)
-        sdf.format(calendar.time)
-    } catch (e: Exception) {
-        "不明"
-    }
 }
